@@ -1,0 +1,5 @@
+# wegame-direct.yaml
+payload:
+  - USER-AGENT,WeGame/2.25.1.7758,DIRECT
+  - USER-AGENT,WeGame/2.24.2.7440,DIRECT
+  - USER-AGENT,WeGame Client/2.0,DIRECT

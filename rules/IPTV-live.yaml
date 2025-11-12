@@ -1,0 +1,45 @@
+# iptv-live.yaml
+# 规则来源: 综合整理与维护
+# 用途: 匹配中国内地及港澳地区的直播流媒体域名和IP
+# 【优先级 1: 组播地址】必须直连，且无需DNS解析
+- IP-CIDR,224.0.0.0/4,📺 IPTV直播,no-resolve
+# 【优先级 2: 央视和地方台官方域名】
+- DOMAIN-SUFFIX,cctv.com,📺 IPTV直播
+- DOMAIN-SUFFIX,cctv.cn,📺 IPTV直播
+- DOMAIN-SUFFIX,cntv.cn,📺 IPTV直播
+- DOMAIN-SUFFIX,cctv14.cn,📺 IPTV直播
+- DOMAIN-SUFFIX,tv.com.cn,📺 IPTV直播
+# 【优先级 3: 主要视频平台直播功能】
+- DOMAIN-SUFFIX,mgtv.com,📺 IPTV直播
+- DOMAIN-SUFFIX,mgtvcdn.com,📺 IPTV直播
+- DOMAIN-SUFFIX,miguvideo.com,📺 IPTV直播
+- DOMAIN-SUFFIX,hn.zhibo.migu.cn,📺 IPTV直播
+- DOMAIN-SUFFIX,migu.cn,📺 IPTV直播
+- DOMAIN-SUFFIX,iqiyi.com,📺 IPTV直播
+- DOMAIN-SUFFIX,iqiyi.com.cn,📺 IPTV直播
+- DOMAIN-SUFFIX,iqiyi-train.com,📺 IPTV直播
+- DOMAIN-SUFFIX,youku.com,📺 IPTV直播
+- DOMAIN-SUFFIX,ykimg.com,📺 IPTV直播
+- DOMAIN-SUFFIX,pplive.cn,📺 IPTV直播
+- DOMAIN-SUFFIX,duokan.com,📺 IPTV直播
+- DOMAIN-SUFFIX,tencentvideo.com,📺 IPTV直播
+- DOMAIN-SUFFIX,dzyai.com,📺 IPTV直播
+- DOMAIN-SUFFIX,dxzyun.com,📺 IPTV直播
+- DOMAIN-SUFFIX,dhky.com,📺 IPTV直播
+- DOMAIN-SUFFIX,dxzy.vip,📺 IPTV直播
+# 【优先级 4: 主要CDN服务商】这些IP段可能被直播流使用
+# 注意: 这些CIDR段可能会很宽泛，请根据您的直播源服务商信息进行精准匹配
+- IP-CIDR,123.125.32.0/22,📺 IPTV直播,no-resolve  # 阿里云 CDN
+- IP-CIDR,123.125.64.0/20,📺 IPTV直播,no-resolve  # 阿里云 CDN
+- IP-CIDR,106.38.0.0/16,📺 IPTV直播,no-resolve   # 阿里云 CDN
+- IP-CIDR,111.161.0.0/16,📺 IPTV直播,no-resolve   # 阿里云 CDN
+- IP-CIDR,119.161.0.0/16,📺 IPTV直播,no-resolve   # 阿里云 CDN
+- IP-CIDR,202.69.0.0/16,📺 IPTV直播,no-resolve   # 网宿 CDN
+- IP-CIDR,117.34.0.0/16,📺 IPTV直播,no-resolve   # 网宿 CDN
+# 【优先级 5: 广电和运营商相关】
+- DOMAIN-SUFFIX,bctv.cn,📺 IPTV直播
+- DOMAIN-SUFFIX,gd.smg.cn,📺 IPTV直播
+- DOMAIN-SUFFIX,bes.tv,📺 IPTV直播
+# 【优先级 6: 聚合直播类应用】
+- DOMAIN-SUFFIX,zhibo.cc,📺 IPTV直播
+- DOMAIN-SUFFIX,bokecc.com,📺 IPTV直播
