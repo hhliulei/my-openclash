@@ -2,33 +2,34 @@
 # 规则来源: 综合整理与维护
 # 用途: 匹配亚太及海外地区的直播流媒体域名和IP
 # 【优先级 1: 香港Now TV】
-- DOMAIN-SUFFIX,nowe.com,📺 APTV直播
-- DOMAIN-SUFFIX,nowe.tv,📺 APTV直播
-- DOMAIN-SUFFIX,nowtv.com.hk,📺 APTV直播
-- DOMAIN-SUFFIX,nowplayer.tv,📺 APTV直播
+- DOMAIN-SUFFIX,nowe.com
+- DOMAIN-SUFFIX,nowe.tv
+- DOMAIN-SUFFIX,nowtv.com.hk
+- DOMAIN-SUFFIX,nowplayer.tv
 # 【优先级 2: 香港ViuTV】
-- DOMAIN-SUFFIX,viu.tv,📺 APTV直播
-- DOMAIN-SUFFIX,viu-now.com,📺 APTV直播
+- DOMAIN-SUFFIX,viu.tv
+- DOMAIN-SUFFIX,viu-now.com
 # 【优先级 3: BBC iPlayer】
-- DOMAIN-SUFFIX,bbc.co.uk,📺 APTV直播
-- DOMAIN-SUFFIX,bbc.com,📺 APTV直播
-- DOMAIN-SUFFIX,bbci.co.uk,📺 APTV直播
-- DOMAIN-SUFFIX,bbcmotiongallery.com,📺 APTV直播
+- DOMAIN-SUFFIX,bbc.co.uk
+- DOMAIN-SUFFIX,bbc.com
+- DOMAIN-SUFFIX,bbci.co.uk
+- DOMAIN-SUFFIX,bbcmotiongallery.com
 # 【优先级 4: 台湾直播源】
 # 台湾的直播源通常是一些电视台的官网或第三方聚合站
-- DOMAIN-SUFFIX,pts.org.tw,📺 APTV直播
-- DOMAIN-SUFFIX,ettoday.net,📺 APTV直播
-- DOMAIN-SUFFIX,ltn.com.tw,📺 APTV直播
-- DOMAIN-SUFFIX,ctitv.com,📺 APTV直播
-- DOMAIN-SUFFIX,tvw.com.tw,📺 APTV直播
-- DOMAIN-SUFFIX,mod.gov.tw,📺 APTV直播 # 中华电信MOD
+- DOMAIN-SUFFIX,pts.org.tw
+- DOMAIN-SUFFIX,ettoday.net
+- DOMAIN-SUFFIX,ltn.com.tw
+- DOMAIN-SUFFIX,ctitv.com
+- DOMAIN-SUFFIX,tvw.com.tw
+- DOMAIN-SUFFIX,mod.gov.tw
 # 【优先级 5: 日本AbemaTV】
-- DOMAIN-SUFFIX,abema.tv,📺 APTV直播
-- DOMAIN-SUFFIX,ameba.jp,📺 APTV直播
+- DOMAIN-SUFFIX,abema.tv
+- DOMAIN-SUFFIX,ameba.jp
 # 【优先级 6: 新加坡直播】
-- DOMAIN-SUFFIX,cna.sg,📺 APTV直播 # Channel NewsAsia
-- DOMAIN-SUFFIX,okto.sg,📺 APTV直播 # Okto
-- DOMAIN-SUFFIX,mewatch.sg,📺 APTV直播 # meWatch
+- DOMAIN-SUFFIX,cna.sg
+- DOMAIN-SUFFIX,okto.sg
+- DOMAIN-SUFFIX,mewatch.sg
 # 【优先级 7: 其他国际平台】
-- DOMAIN-SUFFIX,skai.gr,📺 APTV直播 # 希腊Skai电视台
-- DOMAIN-SUFFIX,prosieben.de,📺 APTV直播 # 德国ProSieben
+- DOMAIN-SUFFIX,skai.gr
+
+- DOMAIN-SUFFIX,prosieben.de
