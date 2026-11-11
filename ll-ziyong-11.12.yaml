@@ -1,0 +1,516 @@
+# >>=======================================================<<
+# ||                                                       ||
+# ||     ██╗     ██╗        ██████╗  ██████╗  ██████╗      ||
+# ||     ██║     ██╗       ██╔════╝ ██╔════╝ ██╔════╝      ||
+# ||     ██║     ██╗       ███████╗ ███████╗ ███████╗      ||
+# ||     ██║     ██╗       ██╔═══██╗██╔═══██╗██╔═══██╗     ||
+# ||     ███████╗ ███████╗ ╚██████╔╝╚██████╔╝╚██████╔╝     ||
+# ||     ╚══════╝ ╚══════╝  ╚═════╝  ╚═════╝  ╚═════╝      ||
+# ||                                                       ||
+# >>=======================================================<<
+# 名称: ll-fallback-mihomo-zhu.yaml
+# 版本: v0.06.6-260624
+# 作者: LLYYDS666
+# 更新: 2026 年 06 月 24 日
+# 地址: https://github.com/hhliulei/hhliulei
+# 地址: https://github.com/666OS/YYDS
+# 地址: https://github.com/liandu2024/little/blob/main/yaml/clash-fallback-smart-std.yaml
+# 地址: https://github.com/qichiyuhub/rule/tree/main/config/mihomo
+# 官方完整配置文件 https://github.com/MetaCubeX/mihomo/blob/Meta/docs/config.yaml
+# 修改自官方示例规则 https://wiki.metacubex.one/example/#meta 
+# 虚空终端 (Clash Meta) Docs 地址: https://wiki.metacubex.one     https://github.com/vernesong/mihomo/releases   https://clashparty.org/docs/guide/smart-core-principles
+# 描述: 基于Mihomo的智能代理配置 集成Smart算法自动选择最优节点，支持故障转移和负载均衡  覆盖AI、流媒体、电报等应用场景
+
+# ███████████████████████████ 锚点区域 ███████████████████████████
+# --- 锚点定义 (通用属性) ---
+# ══ 订阅锚点 ══        # 只看见此节点请更新客户端|测试|试用|使用
+DY: &DY {type: http, interval: 0, proxy: 直接连接, health-check: {enable: true, url: 'https://www.gstatic.com/generate_204', interval: 300},
+ exclude-filter: '(?i)(群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|提示|特别|访问|支持|教程|关注|作者|加入|剩余|重置|到期|导航|有效期|建议|更新|显示|客户端|时间|维护|浙地珠宝|异常|失联|失败|套餐|域名|问题|自动|单数|双数|USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author|距离|超时|收藏|福利|好友|选择|公益|发布|DIZTNA|通路|登录|禁止|定时|渠道|牢记|永久|余额|阁下|本站|刷新|⚠️|@|http|com)'}
+# 节点筛选正则表达式 - 基于地理位置和关键词过滤
+# ══ 出站锚点 ══
+# 策略组代理列表模板 - 预定义的代理节点优先级排序
+proxies_AdBlock: &proxies_AdBlock {type: select, proxies: [REJECT-DROP, REJECT, PASS, PASS-RULE, 直接连接, 漏网之鱼]}
+proxies_QUIC: &proxies_QUIC       {type: select, proxies: [PASS-RULE, PASS, REJECT]}
+proxies_direct: &proxies_direct   {type: select, proxies: [DIRECT, IPV4优先, IPV6优先, 仅IPV4, 仅IPV6]}
+proxies_quanbu: &proxies_quanbu   {type: select, proxies: [自建CN2GIA-故转, 自建-故转, 香港-故转, 台湾-故转, 日本-故转, 新加坡-故转, 美国-故转, 韩国-故转, 英国-故转, 欧洲-故转, 德国-故转, 冷门-故转, 全球-故转, CF优选-故转, 家宽-故转, 高倍-故转, 低倍-故转, 直接连接]}
+
+# ══ 节点筛选锚点 ══
+# 节点筛选正则表达式 - 基于地理位置和关键词过滤
+ZJCN2: &ZJCN2 {filter: '(?i)(sadidc|raksmart)'}
+ZJ: &ZJ {filter: '(?i)(ll|uqidc|zxiyun|akile|dedirock|rabisu|cloudnium)'}
+CF: &CF {filter: '(?i)(cf|cf|选|CF选|电信|cloudleadinn)'}
+JK: &JK {filter: '(?i)(家宽|家庭宽带|家用宽带|住宅|双\s*isp|原生\s*|商宽|residential|(?<![a-zA-Z])(isp|res|resnet)(?![a-zA-Z]))'}
+# --- 倍率筛选节点 ---
+HR: &HR {filter: '(?i)(高倍|高级|旗舰|(?<![\d.])(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?(?:倍|[*×✕✖️⨯⨉x])|[*×✕✖️⨯⨉x](?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?)'}
+LH: &LH {filter: '(?i)(^(?!.*(剩|期|客户端|软件|官网)).*(?:(?<![\d.])0(\.[0-5]|[*×✕✖️⨯⨉x倍]))|(?:[*×✕✖️⨯⨉x]0)|低倍|大流量|(?<![a-zA-Z])free(?![a-zA-Z]))'}
+# --- 常用地区节点 ---
+HK: &HK {filter: '(?i)(🇭🇰|港|(?<![A-Za-z])HKG?(?![A-Za-z])|hong\s*kong)'}
+TW: &TW {filter: '(?i)(🇹🇼|🇼🇸|台湾|台北|台中|高雄|(?<![a-zA-Z])(tw|twn|tpe|khh)(?![a-zA-Z]))'}
+JP: &JP {filter: '(?i)(?!.*(尼日|到期|重置|剩余)).*(🇯🇵|日本|东京|大阪|京都|埼玉|沪日|深日|广日|(?<![a-zA-Z])(jp|jpn|nrt|hnd|kix|tyo|osa|fuk)(?![a-zA-Z]))'}
+SG: &SG {filter: '(?i)(?!.*(吉隆坡|马来)).*(🇸🇬|新加坡|狮城|星加坡|沪新|深新|广新|(?<![a-zA-Z])(sg|sgp|sin|xsp)(?![a-zA-Z])|singapore)'}
+US: &US {filter: '(?i)(?!.*(南美|北美|拉美)).*(🇺🇸|美国|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|西雅图|芝加哥|纽约|亚特兰大|迈阿密|华盛顿|休斯顿|波士顿|旧金山|沪美|深美|广美|(?<![a-zA-Z])(us|usa|sjc|jfk|lax|ord|atl|dfw|sfo|mia|sea|iad|ewr)(?![a-zA-Z])|united\s*states|america)'}
+KR: &KR {filter: '(?i)(?!.*(南非|south\s*africa)).*(🇰🇷|韩国|韓國|首尔|首爾|春川|釜山|沪韩|深韩|广韩|(?<![a-zA-Z])(kr|kor|icn)(?![a-zA-Z])|korea)'}
+UK: &UK {filter: '(?i)(?!.*(流量|剩余|到期|gbps|mbps)).*(🇬🇧|英国|大不列颠|英格兰|伦敦|曼彻斯特|london|manchester|england|britain|united\s*kingdom|(?<![a-zA-Z0-9])(uk|gbr|lhr|man)(?![a-zA-Z0-9]))'}
+EU: &EU {filter: '(?i)(?!.*(美西|巴西|圣何塞|拉斯维加斯|宁波)).*(🇪🇺|欧洲|欧盟|德国|法国|荷兰|俄罗斯|乌克兰|波兰|捷克|芬兰|瑞典|挪威|丹麦|瑞士|奥地利|比利时|西班牙|葡萄牙|意大利|希腊|匈牙利|爱尔兰|罗马尼亚|保加利亚|克罗地亚|塞尔维亚|斯洛伐克|斯洛文尼亚|爱沙尼亚|拉脱维亚|立陶宛|卢森堡|马耳他|冰岛|法兰克福|阿姆斯特丹|巴黎|马德里|苏黎世|米兰|柏林|(?<![a-zA-Z])(eu|de|fr|nl|ru|pl|se|no|fi|dk|ch|at|be|es|pt|it|ie|fra|ams|cdg|mad|bcn|zrh|fco|muc|bru)(?![a-zA-Z]))'}
+DE: &DE {filter: '(?i)(🇩🇪|德国|德意志|法兰克福|柏林|慕尼黑|杜塞尔多夫|frankfurt|berlin|munich|germany|(?<![a-zA-Z])(de|deu|fra|muc|dus)(?![a-zA-Z]))'}
+# --- 全部/冷门节点 ---
+OT: &OT {filter: '^(?!.*(?i)(优先|仅|DIRECT|直接连接|直连|ll|uqidc|sadidc|cloudleadinn|zxiyun|akile|dedirock|rabisu|cloudnium|raksmart|香港|台湾|日本|新加坡|狮城|美国|韩国|英国|德国|法国|荷兰|俄罗斯|欧洲|欧盟|(?<![a-zA-Z])(hk|twn?|jpn?|sgp?|usa?|kor?|gbr?|fra?|deu?|nld?)(?![a-zA-Z])|🇭🇰|🇹🇼|🇼🇸|🇯🇵|🇸🇬|🇺🇸|🇰🇷|🇬🇧|🇩🇪|🇫🇷|🇳🇱)).*$'}
+AL: &AL {filter: '^(?!.*(?i)(优先|仅|DIRECT|直接连接|直连|ll|uqidc|sadidc|cloudleadinn|zxiyun|akile|dedirock|rabisu|cloudnium|raksmart)).*$'}
+
+# ══ 策略组锚点 ══   
+# 策略组类型模板 - 定义不同的策略组基础配置
+SD: &SD {type: select}
+FB: &FB {type: fallback,     interval: 300, lazy: true, url: 'https://www.gstatic.com/generate_204'}
+ZD: &ZD {type: url-test,     interval: 300, lazy: true, url: 'https://www.gstatic.com/generate_204', tolerance: 50, hidden: true}
+ST: &ST {type: smart,        interval: 200, lazy: true, url: 'https://www.gstatic.com/generate_204', uselightgbm: true, strategy: sticky-sessions, collectdata: false, sample-rate: 1, hidden: true}
+XL: &XL {type: load-balance, interval: 300, lazy: true, url: 'https://www.gstatic.com/generate_204', strategy: consistent-hashing, hidden: true}
+LX: &LX {type: load-balance, interval: 300, lazy: true, url: 'https://www.gstatic.com/generate_204', strategy: round-robin, hidden: true}
+
+# 图标锚点
+ZJT: &ZJT 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Static.svg'
+CFT: &CFT 'https://github.com/Koolson/Qure/raw/master/IconSet/Color/Cloudflare.png'
+JKT: &JKT 'https://img.icons8.com/fluency/256/home.png'
+HRT: &HRT 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Airport.svg'
+LHT: &LHT 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Available.svg'
+HKT: &HKT 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/HongKong.svg'
+TWT: &TWT 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Taiwan.svg'
+JPT: &JPT 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Japan.svg'
+SGT: &SGT 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Singapore.svg'
+UST: &UST 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/America.svg'
+KRT: &KRT 'https://github.com/Koolson/Qure/raw/master/IconSet/Color/Korea.png'
+UKT: &UKT 'https://github.com/Koolson/Qure/raw/master/IconSet/Color/United_Kingdom.png'
+EUT: &EUT 'https://github.com/Koolson/Qure/raw/master/IconSet/Color/European_Union.png'
+DET: &DET 'https://raw.githubusercontent.com/echs-top/proxy/refs/heads/main/img/flag-icons/de.svg'
+OTT: &OTT 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/WorldMap.svg'
+ALT: &ALT 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/WorldMap.svg'
+
+# ══ 规则锚点 ══
+# 规则集行为模板
+DmnMrs: &DmnMrs {type: http, interval: 86400, proxy: 默认代理, behavior: domain,    format: mrs}
+DmnYml: &DmnYml {type: http, interval: 86400, proxy: 默认代理, behavior: domain,    format: yaml}
+DmnTxt: &DmnTxt {type: http, interval: 86400, proxy: 默认代理, behavior: domain,    format: text}
+IpcMrs: &IpcMrs {type: http, interval: 86400, proxy: 默认代理, behavior: ipcidr,    format: mrs}
+ClsTxt: &ClsTxt {type: http, interval: 86400, proxy: 默认代理, behavior: classical, format: text}
+ClsYml: &ClsYml {type: http, interval: 86400, proxy: 默认代理, behavior: classical, format: yaml}
+
+# ══ Smart 优先级权重锚点 ══
+PriorityDQ: &PriorityDQ 'HK:2;香港:2;Hong Kong:2;SG:1.5;新加坡:1.5;Singapore:1.5;JP:1;日本:1;Japan:1;TW:0.8;台湾:0.8;Taiwan:0.8;US:0.5;美国:0.5;United States:0.5'
+PriorityMR: &PriorityMR '🛫 raksmart圣何塞-CN2:2;🛫 sadidc美国-CN2:1.8;🛫 洛杉矶-rabisu:0.5;🛫 洛杉矶-dedirock:0.5;🛫 mitce直连:1.2;🛫 赔钱:1.2;🛫 良心云:1.2;🛫 多宝:0.8;🛫 nice机场:1;🛫 破晓:1'
+
+# ███████████████████████████ 节点订阅 ███████████████████████████
+# 订阅提供者，如果你想要添加多个订阅提供者，可以复制配置块，并修改 url 和 additional-prefix 字段。
+proxy-providers:
+  '🛫 A-raksmart': {<<: *DY, url: '...', override: {additional-prefix: '[🛫 raksmart圣何塞-CN2]'}}
+  '🛫 B-sadidc':   {<<: *DY, url: '...', override: {additional-prefix: '[🛫 sadidc美国-CN2]'}}
+  '🛫 C-rabisu':   {<<: *DY, url: '...', override: {additional-prefix: '[🛫 洛杉矶-rabisu]'}}
+  '🛫 D-dedirock': {<<: *DY, url: '...', override: {additional-prefix: '[🛫 洛杉矶-dedirock]'}}
+
+#   '🛫 E-cf':   {<<: *DY, url: '...', override: {additional-prefix: '[🛫 cf]'}}
+#   '🛫 F-cf1': {<<: *DY, url: '...', override: {additional-prefix: '[🛫 cf1]'}}
+
+  '🛫 G-mitce': {<<: *DY, url: '...', override: {additional-prefix: '[🛫 mitce直连]'}}
+  '🛫 H-赔钱':  {<<: *DY, url: '...', override: {additional-prefix: '[🛫 赔钱]'}}
+  '🛫 I-多宝':  {<<: *DY, url: '...', override: {additional-prefix: '[🛫 多宝]'}}
+  '🛫 J-良心':  {<<: *DY, url: '...', override: {additional-prefix: '[🛫 良心云]'}}
+  '🛫 K-破晓':  {<<: *DY, url: '...', override: {additional-prefix: '[🛫 破晓]'}}
+  '🛫 L-nice':  {<<: *DY, url: '...', override: {additional-prefix: '[🛫 nice机场]'}}
+
+# 地区分组，建议区分普通节点和专线
+CN2: &CN2 {use: ['🛫 A-raksmart','🛫 B-sadidc']}
+PT: &PT   {use: ['🛫 C-rabisu','🛫 D-dedirock']}
+# cfdy: &cfdy   {use: ['🛫 E-cf','🛫 F-cf1']}
+JC: &JC   {use: ['🛫 E-mitce','🛫 F-赔钱','🛫 G-多宝','🛫 H-良心','🛫 I-破晓','🛫 J-nice']}
+
+# ==================== 静态代理节点 ====================
+# 直连控制节点：IP版本精细化控制
+# 节点配置，可添加自定义节点
+proxies: [{name: IPV4优先, type: direct, udp: true, ip-version: ipv4-prefer},{name: IPV6优先, type: direct, udp: true, ip-version: ipv6-prefer},{name: 仅IPV4, type: direct, udp: true, ip-version: ipv4},{name: 仅IPV6, type: direct, udp: true, ip-version: ipv6}]
+
+# ███████████████████████████ 核心配置 ███████████████████████████
+# ══ 基础配置 ══
+port: 7890
+socks-port: 7891
+redir-port: 7892
+mixed-port: 7893
+tproxy-port: 7894
+
+ipv6: false
+allow-lan: true
+bind-address: '*'
+log-level: info
+
+# ══ TCP 连接 ══
+unified-delay: true
+tcp-concurrent: true
+keep-alive-interval: 15
+keep-alive-idle: 600
+
+# ══ 认证配置 ══
+authentication: ['hh1992:hh19920111']
+skip-auth-prefixes: ['127.0.0.0/8', '192.168.0.0/16', '::1/128']
+
+# ══ 配置存储 ══
+profile: {store-selected: true, store-fake-ip: true}
+
+# ══ 管理面板配置 ══
+external-controller: 0.0.0.0:9090
+secret: 'hh19920111'
+external-ui: ui
+external-ui-name: zashboard
+external-ui-url: 'https://github.com/Zephyruso/zashboard/archive/refs/heads/gh-pages.zip'
+
+# ══ GEO 数据库配置 ══
+# 各个数据库源地址
+geox-url:
+  mmdb: 'https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb'
+
+ntp:
+  enable: true
+  write-to-system: true
+
+# ══ TUN配置 ══
+tun:
+  enable: true
+  stack: mips       ## 协议栈：mixed (混合) / system / gvisor / mips ##如果内核版本大于v1.19.31，此处可以改为自研协议栈 mips ，理论上性能更好。
+  dns-hijack: ['any:53', 'tcp://any:53']
+  auto-route: true                                                                       # 仅linux生效
+  auto-redirect: true
+  auto-detect-interface: true
+  route-exclude-address-set:               # 绕过大陆 匹配大陆IP-CIDR（流量不进入代理）  仅linux生效
+    - cn_ip                                # 绕过CN IP
+
+# ══ 嗅探功能 ══
+sniffer:
+  enable: true
+  parse-pure-ip: true
+  force-dns-mapping: false
+  override-destination: false
+  sniff: {HTTP: {ports: [80, 8080-8880]}, TLS: {ports: [443, 8443]}, QUIC: {ports: [443, 8443]}}
+  skip-domain: ['Mijia Cloud', '+.push.apple.com']
+
+# ══ DNS配置 ══
+hosts:
+  dns.alidns.com:     [223.5.5.5, 223.6.6.6, '2400:3200::1', '2400:3200:baba::1']
+  doh.pub:            [1.12.12.12, 120.53.53.53, '2402:4e00::', 1.12.12.21]
+  cloudflare-dns.com: [1.1.1.1, 1.0.0.1, '2606:4700:4700::1111', '2606:4700:4700::1001']
+  dns.google:         [8.8.8.8, 8.8.4.4, '2001:4860:4860::8888', '2001:4860:4860::8844']
+  dns.quad9.net:      [9.9.9.9, 149.112.112.112, '2620:fe::fe', '2620:fe::9']
+  dns11.quad9.net:    [9.9.9.11, 149.112.112.11, '2620:fe::11', '2620:fe::fe:11']
+  services.googleapis.cn: services.googleapis.com
+  cn.bing.com: global.bing.com
+  google.cn: google.com
+
+# ══ DNS锚点 ══
+direct-IPdoh: &direct-IPdoh ['https://223.5.5.5/dns-query', 'https://223.6.6.6/dns-query', 'https://1.12.12.12/dns-query', 'https://120.53.53.53/dns-query']
+direct-YMdoh: &direct-YMdoh ['https://dns.alidns.com/dns-query', 'https://doh.pub/dns-query']
+proxy-IPdoh: &proxy-IPdoh   ['https://8.8.8.8/dns-query', 'https://1.1.1.1/dns-query', 'https://1.0.0.1/dns-query']
+direct-po-YMdoh-po: &direct-po-YMdoh-po ['https://dns.alidns.com/dns-query#disable-qtype-65=true', 'https://doh.pub/dns-query#disable-qtype-65=true']
+proxy-po-IPdoh-po: &proxy-po-IPdoh-po   ['https://8.8.8.8/dns-query#默认代理&disable-qtype-65=true', 'https://8.8.4.4/dns-query#默认代理&disable-qtype-65=true', 'https://1.1.1.1/dns-query#默认代理&disable-qtype-65=true', 'https://1.0.0.1/dns-query#默认代理&disable-qtype-65=true']
+proxy-na-IPdoh-na: &proxy-na-IPdoh-na   ['https://8.8.8.8/dns-query#默认代理&ecs=223.5.5.0/24', 'https://8.8.4.4/dns-query#默认代理&ecs=223.5.5.0/24', 'https://1.1.1.1/dns-query#默认代理&ecs=223.5.5.0/24', 'https://1.0.0.1/dns-query#默认代理&ecs=223.5.5.0/24']
+proxy-fb-IPdoh-fb: &proxy-fb-IPdoh-fb   ['https://8.8.8.8/dns-query#默认代理', 'https://8.8.4.4/dns-query#默认代理', 'https://1.1.1.1/dns-query#默认代理', 'https://1.0.0.1/dns-query#默认代理']
+
+# 我的 DNS配置
+dns:
+  enable: true
+  cache-algorithm: arc
+  ipv6: false
+  use-hosts: true           #是否回应配置中的 hosts，默认 true
+  enhanced-mode: fake-ip
+  fake-ip-ttl: 1
+  fake-ip-range: 198.18.0.0/16
+  fake-ip-filter-mode: blacklist
+  default-nameserver: *direct-IPdoh
+  proxy-server-nameserver: *direct-YMdoh
+  direct-nameserver: *direct-YMdoh
+  nameserver-policy:
+    'rule-set:cn_domain,private_domain,fakeipfilter_cn,steamcn_domain,microsoftcn_domain,applecn_domain': *direct-po-YMdoh-po
+    'rule-set:fakeipfilter_!cn': *proxy-po-IPdoh-po
+  nameserver: *proxy-na-IPdoh-na
+  fallback: *proxy-fb-IPdoh-fb
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+  fake-ip-filter: ['rule-set:fakeipfilter_cn', 'rule-set:fakeipfilter_!cn', 'rule-set:private_domain', 'rule-set:cn_domain', 'rule-set:microsoftcn_domain', 'rule-set:applecn_domain', 'rule-set:steamcn_domain']
+
+# ███████████████████████████ 策略分组 ███████████████████████████
+# 定义分流策略组
+# 应用策略层 - Select手动选择，支持多场景应用优化，使用时默认，也可修改
+proxy-groups:
+  # ==================== 主要策略组 ====================
+#   - {name: AdBlock, <<: *proxies_AdBlock, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/AdBlock.svg', hidden: true}
+#   - {name: 代理QUIC, <<: *proxies_QUIC, icon: 'https://mihomo.echs.top/img/Hand-Painted-icon/Google_Suite/Admin.png', hidden: true}
+  - {name: GLOBAL,  <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/s0lnce/mofish-icon/refs/heads/main/mihomo/pure/corner/all.png', hidden: true}
+  - {name: 直接连接, <<: *proxies_direct, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/China.svg', hidden: true}
+  - {name: 默认代理, <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/s0lnce/mofish-icon/refs/heads/main/mihomo/pure/corner/select.png', hidden: true}
+  - {name: 漏网之鱼, <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/Giveupmoon/Clash_Rules_Yaml/main/Icon/match.png', hidden: true}
+
+  # ==================== 商业服务 ====================
+  - {name: 人工智能, <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/OpenAI.svg'}
+  - {name: GitHub,  <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/GitHub.svg'}
+  - {name: 油管视频, <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/YouTube.svg'}
+  - {name: 谷歌服务, <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Google.svg'}
+  - {name: 微软服务, <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Microsoft.svg'}
+  - {name: OneDrive, <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/s0lnce/mofish-icon/refs/heads/main/mihomo/pure/corner/onedrive.png'}
+  - {name: 苹果服务, <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/Giveupmoon/Clash_Rules_Yaml/main/Icon/HOMOMIX/Color/Large/Apple_black.png'}
+
+  # ==================== 社交平台 ====================
+  - {name: 电报消息, <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Telegram.svg'}
+  - {name: Twitter, <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Twitter.svg'}
+  - {name: TikTok,  <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/TikTok.svg'}
+
+  # ==================== 媒体服务 ====================
+  - {name: 奈飞视频,    <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Netflix.svg'}
+  - {name: DisneyPlus, <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/Giveupmoon/Clash_Rules_Yaml/main/Icon/HOMOMIX/Color/Large/Disney_plus.png'}
+  - {name: PrimeVideo, <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/Giveupmoon/Clash_Rules_Yaml/main/Icon/HOMOMIX/Color/Large/Prime.png'}
+  - {name: HBO,        <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/Giveupmoon/Clash_Rules_Yaml/main/Icon/HOMOMIX/Color/Large/HBO_MAX.png'}
+  - {name: AppleTV+,   <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/Giveupmoon/Clash_Rules_Yaml/main/Icon/HOMOMIX/Color/Large/Apple_TV.png'}
+  - {name: Bahamut, default-selected: 台湾-故转, <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/Giveupmoon/Clash_Rules_Yaml/main/Icon/HOMOMIX/Color/Large/Bahamut_i.png'}
+
+  # ==================== 货币服务 ====================
+  - {name: PayPal,  <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/PayPal.svg'}
+  - {name: 货币平台, <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Bitcoin.svg'}
+
+  # ==================== 游戏服务 ====================
+  - {name: Steam,   default-selected: 香港-故转, <<: *proxies_quanbu, icon: 'https://cdn.jsdmirror.com/gh/AIsouler/MyClash@main/Icons/svg/Steam.svg'}
+  - {name: 游戏平台, default-selected: 香港-故转, <<: *proxies_quanbu, icon: 'https://raw.githubusercontent.com/Giveupmoon/Clash_Rules_Yaml/main/Icon/HOMOMIX/Color/Large/Game.png'}
+
+  # --- 地区策略组 ---
+  # 线路特性层 - Fallback故障转移，（适合不想节点总是被切换或者对固定IP有要求，若手动选择节点飘红 会自动切到智能策略组，保证节点可用性）,（不需要该策略可以在组名上添加 # 注释）
+  # 线路策略层 - Smart智能选择，政策权重数值越大优先级越高，修改为关键词节点，比如 优:2;中:1;备:0.5，默认为1，优>中>备，使用时请修改
+  # 线路特性层 - 手动选择节点，根据自己需求选择节点，建议修改位置顺序发挥线路优势,（不需要该策略可以在组名上添加 # 注释）
+  # 自建节点CN2GIA
+  - {name: 自建CN2GIA-故转, <<: [*FB, *CN2, *ZJCN2], include-all: true, proxies: [自建CN2GIA-手选, 自建CN2GIA-智选, 自建CN2GIA-自动, 自建CN2GIA-均衡-散列, 自建CN2GIA-均衡-轮询], icon: *ZJT}
+  - {name: 自建CN2GIA-手选, <<: [*SD, *CN2, *ZJCN2], include-all: true, icon: *ZJT}
+  - {name: 自建CN2GIA-智选, <<: [*ST, *CN2, *ZJCN2], include-all: true, policy-priority: *PriorityMR, icon: *ZJT}
+  - {name: 自建CN2GIA-自动, <<: [*ZD, *CN2, *ZJCN2], include-all: true, icon: *ZJT}
+  - {name: 自建CN2GIA-均衡-散列, <<: [*XL, *CN2, *ZJCN2], include-all: true, icon: *ZJT}
+  - {name: 自建CN2GIA-均衡-轮询, <<: [*LX, *CN2, *ZJCN2], include-all: true, icon: *ZJT}
+
+  # 自建节点
+  - {name: 自建-故转, <<: [*FB, *PT, *ZJ], include-all: true, proxies: [自建-手选, 自建-智选, 自建-自动, 自建-均衡-散列, 自建-均衡-轮询], icon: *ZJT}
+  - {name: 自建-手选, <<: [*SD, *PT, *ZJ], include-all: true, icon: *ZJT}
+  - {name: 自建-智选, <<: [*ST, *PT, *ZJ], include-all: true, policy-priority: *PriorityMR, icon: *ZJT}
+  - {name: 自建-自动, <<: [*ZD, *PT, *ZJ], include-all: true, icon: *ZJT}
+  - {name: 自建-均衡-散列, <<: [*XL, *PT, *ZJ], include-all: true, icon: *ZJT}
+  - {name: 自建-均衡-轮询, <<: [*LX, *PT, *ZJ], include-all: true, icon: *ZJT}
+
+  # CF优选节点
+#   - {name: CF优选-故转, <<: [*FB, *cfdy, *CF], proxies: [CF优选-智选, CF优选-自动, CF优选-手选, CF优选-均衡-散列, CF优选-均衡-轮询], icon: *CFT}
+#   - {name: CF优选-智选, <<: [*ST, *cfdy, *CF], include-all: true, policy-priority: *PriorityMR, icon: *CFT}
+#   - {name: CF优选-自动, <<: [*ZD, *cfdy, *CF], include-all: true, icon: *CFT}
+#   - {name: CF优选-手选, <<: [*SD, *cfdy, *CF], include-all: true, icon: *CFT}
+#   - {name: CF优选-均衡-散列, <<: [*XL, *cfdy, *CF], include-all: true, icon: *CFT}
+#   - {name: CF优选-均衡-轮询, <<: [*LX, *cfdy, *CF], include-all: true, icon: *CFT}
+
+  # 家宽节点
+  - {name: 家宽-故转, <<: [*FB, *JK], proxies: [家宽-手选, 家宽-智选, 家宽-自动, 家宽-均衡-散列, 家宽-均衡-轮询], icon: *JKT}
+  - {name: 家宽-手选, <<: [*SD, *JK], include-all: true, icon: *JKT}
+  - {name: 家宽-智选, <<: [*ST, *JK], include-all: true, policy-priority: *PriorityMR, icon: *JKT}
+  - {name: 家宽-自动, <<: [*ZD, *JK], include-all: true, icon: *JKT}
+  - {name: 家宽-均衡-散列, <<: [*XL, *JK], include-all: true, icon: *JKT}
+  - {name: 家宽-均衡-轮询, <<: [*LX, *JK], include-all: true, icon: *JKT}
+
+  # 高倍节点
+  - {name: 高倍-故转, <<: [*FB, *JC, *HR], proxies: [高倍-智选, 高倍-自动, 高倍-手选, 高倍-均衡-散列, 高倍-均衡-轮询], icon: *HRT}
+  - {name: 高倍-智选, <<: [*ST, *JC, *HR], include-all: true, policy-priority: *PriorityMR, icon: *HRT}
+  - {name: 高倍-自动, <<: [*ZD, *JC, *HR], include-all: true, icon: *HRT}
+  - {name: 高倍-手选, <<: [*SD, *JC, *HR], include-all: true, icon: *HRT}
+  - {name: 高倍-均衡-散列, <<: [*XL, *JC, *HR], include-all: true, icon: *HRT}
+  - {name: 高倍-均衡-轮询, <<: [*LX, *JC, *HR], include-all: true, icon: *HRT}
+
+  # 低倍节点
+  - {name: 低倍-故转, <<: [*FB, *JC, *LH], proxies: [低倍-智选, 低倍-自动, 低倍-手选, 低倍-均衡-散列, 低倍-均衡-轮询], icon: *LHT}
+  - {name: 低倍-智选, <<: [*ST, *JC, *LH], include-all: true, policy-priority: *PriorityMR, icon: *LHT}
+  - {name: 低倍-自动, <<: [*ZD, *JC, *LH], include-all: true, icon: *LHT}
+  - {name: 低倍-手选, <<: [*SD, *JC, *LH], include-all: true, icon: *LHT}
+  - {name: 低倍-均衡-散列, <<: [*XL, *JC, *LH], include-all: true, icon: *LHT}
+  - {name: 低倍-均衡-轮询, <<: [*LX, *JC, *LH], include-all: true, icon: *LHT}
+
+  # 香港节点
+  - {name: 香港-故转, <<: [*FB, *JC, *HK], proxies: [香港-智选, 香港-自动, 香港-手选, 香港-均衡-散列, 香港-均衡-轮询], icon: *HKT}
+  - {name: 香港-智选, <<: [*ST, *JC, *HK], include-all: true, policy-priority: *PriorityMR, icon: *HKT}
+  - {name: 香港-自动, <<: [*ZD, *JC, *HK], include-all: true, icon: *HKT}
+  - {name: 香港-手选, <<: [*SD, *JC, *HK], include-all: true, icon: *HKT}
+  - {name: 香港-均衡-散列, <<: [*XL, *JC, *HK], include-all: true, icon: *HKT}
+  - {name: 香港-均衡-轮询, <<: [*LX, *JC, *HK], include-all: true, icon: *HKT}
+
+  # 台湾节点
+  - {name: 台湾-故转, <<: [*FB, *JC, *TW], proxies: [台湾-智选, 台湾-自动, 台湾-手选, 台湾-均衡-散列, 台湾-均衡-轮询], icon: *TWT}
+  - {name: 台湾-智选, <<: [*ST, *JC, *TW], include-all: true, policy-priority: *PriorityMR, icon: *TWT}
+  - {name: 台湾-自动, <<: [*ZD, *JC, *TW], include-all: true, icon: *TWT}
+  - {name: 台湾-手选, <<: [*SD, *JC, *TW], include-all: true, icon: *TWT}
+  - {name: 台湾-均衡-散列, <<: [*XL, *JC, *TW], include-all: true, icon: *TWT}
+  - {name: 台湾-均衡-轮询, <<: [*LX, *JC, *TW], include-all: true, icon: *TWT}
+
+  #日本节点
+  - {name: 日本-故转, <<: [*FB, *JC, *JP], proxies: [日本-智选, 日本-自动, 日本-手选, 日本-均衡-散列, 日本-均衡-轮询], icon: *JPT}
+  - {name: 日本-智选, <<: [*ST, *JC, *JP], include-all: true, policy-priority: *PriorityMR, icon: *JPT}
+  - {name: 日本-自动, <<: [*ZD, *JC, *JP], include-all: true, icon: *JPT}
+  - {name: 日本-手选, <<: [*SD, *JC, *JP], include-all: true, icon: *JPT}
+  - {name: 日本-均衡-散列, <<: [*XL, *JC, *JP], include-all: true, icon: *JPT}
+  - {name: 日本-均衡-轮询, <<: [*LX, *JC, *JP], include-all: true, icon: *JPT}
+
+  # 新加坡节点
+  - {name: 新加坡-故转, <<: [*FB, *JC, *SG], proxies: [新加坡-智选, 新加坡-自动, 新加坡-手选, 新加坡-均衡-散列, 新加坡-均衡-轮询], icon: *SGT}
+  - {name: 新加坡-智选, <<: [*ST, *JC, *SG], include-all: true, policy-priority: *PriorityMR, icon: *SGT}
+  - {name: 新加坡-自动, <<: [*ZD, *JC, *SG], include-all: true, icon: *SGT}
+  - {name: 新加坡-手选, <<: [*SD, *JC, *SG], include-all: true, icon: *SGT}
+  - {name: 新加坡-均衡-散列, <<: [*XL, *JC, *SG], include-all: true, icon: *SGT}
+  - {name: 新加坡-均衡-轮询, <<: [*LX, *JC, *SG], include-all: true, icon: *SGT}
+
+  # 美国节点
+  - {name: 美国-故转, <<: [*FB, *JC, *US], proxies: [美国-智选, 美国-自动, 美国-手选, 美国-均衡-散列, 美国-均衡-轮询], icon: *UST}
+  - {name: 美国-智选, <<: [*ST, *JC, *US], include-all: true, policy-priority: *PriorityMR, icon: *UST}
+  - {name: 美国-自动, <<: [*ZD, *JC, *US], include-all: true, icon: *UST}
+  - {name: 美国-手选, <<: [*SD, *JC, *US], include-all: true, icon: *UST}
+  - {name: 美国-均衡-散列, <<: [*XL, *JC, *US], include-all: true, icon: *UST}
+  - {name: 美国-均衡-轮询, <<: [*LX, *JC, *US], include-all: true, icon: *UST}
+
+  # 韩国节点
+  - { name: 韩国-故转, <<: [*FB, *JC, *KR], proxies: [韩国-智选, 韩国-自动, 韩国-手选, 韩国-均衡-散列, 韩国-均衡-轮询], icon: *KRT}
+  - { name: 韩国-智选, <<: [*ST, *JC, *KR], include-all: true, policy-priority: *PriorityMR, icon: *KRT}
+  - { name: 韩国-自动, <<: [*ZD, *JC, *KR], include-all: true, icon: *KRT}
+  - { name: 韩国-手选, <<: [*SD, *JC, *KR], include-all: true, icon: *KRT}
+  - { name: 韩国-均衡-散列, <<: [*XL, *JC, *KR], include-all: true, icon: *KRT}
+  - { name: 韩国-均衡-轮询, <<: [*LX, *JC, *KR], include-all: true, icon: *KRT}
+
+  # 英国节点
+  - {name: 英国-故转, <<: [*FB, *JC, *UK], proxies: [英国-智选, 英国-自动, 英国-手选, 英国-均衡-散列, 英国-均衡-轮询], icon: *UKT}
+  - {name: 英国-智选, <<: [*ST, *JC, *UK], include-all: true, policy-priority: *PriorityMR, icon: *UKT}
+  - {name: 英国-自动, <<: [*ZD, *JC, *UK], include-all: true, icon: *UKT}
+  - {name: 英国-手选, <<: [*SD, *JC, *UK], include-all: true, icon: *UKT}
+  - {name: 英国-均衡-散列, <<: [*XL, *JC, *UK], include-all: true, icon: *UKT}
+  - {name: 英国-均衡-轮询, <<: [*LX, *JC, *UK], include-all: true, icon: *UKT}
+
+  # 欧洲节点
+  - {name: 欧洲-故转, <<: [*FB, *JC, *EU], proxies: [欧洲-智选, 欧洲-自动, 欧洲-手选, 欧洲-均衡-散列, 欧洲-均衡-轮询], icon: *EUT}
+  - {name: 欧洲-智选, <<: [*ST, *JC, *EU], include-all: true, policy-priority: *PriorityMR, icon: *EUT}
+  - {name: 欧洲-自动, <<: [*ZD, *JC, *EU], include-all: true, icon: *EUT}
+  - {name: 欧洲-手选, <<: [*SD, *JC, *EU], include-all: true, icon: *EUT}
+  - {name: 欧洲-均衡-散列, <<: [*XL, *JC, *EU], include-all: true, icon: *EUT}
+  - {name: 欧洲-均衡-轮询, <<: [*LX, *JC, *EU], include-all: true, icon: *EUT}
+
+  # 德国节点
+  - {name: 德国-故转, <<: [*FB, *JC, *DE], proxies: [德国-智选, 德国-自动, 德国-手选, 德国-均衡-散列, 德国-均衡-轮询], icon: *DET}
+  - {name: 德国-智选, <<: [*ST, *JC, *DE], include-all: true, policy-priority: *PriorityMR, icon: *DET}
+  - {name: 德国-自动, <<: [*ZD, *JC, *DE], include-all: true, icon: *DET}
+  - {name: 德国-手选, <<: [*SD, *JC, *DE], include-all: true, icon: *DET}
+  - {name: 德国-均衡-散列, <<: [*XL, *JC, *DE], include-all: true, icon: *DET}
+  - {name: 德国-均衡-轮询, <<: [*LX, *JC, *DE], include-all: true, icon: *DET}
+
+  # 冷门节点
+  - {name: 冷门-故转, <<: [*FB, *JC, *OT], proxies: [冷门-智选, 冷门-自动, 冷门-手选, 冷门-均衡-散列, 冷门-均衡-轮询], icon: *OTT}
+  - {name: 冷门-智选, <<: [*ST, *JC, *OT], include-all: true, policy-priority: *PriorityMR, icon: *OTT}
+  - {name: 冷门-自动, <<: [*ZD, *JC, *OT], include-all: true, icon: *OTT}
+  - {name: 冷门-手选, <<: [*SD, *JC, *OT], include-all: true, icon: *OTT}
+  - {name: 冷门-均衡-散列, <<: [*XL, *JC, *OT], include-all: true, icon: *OTT}
+  - {name: 冷门-均衡-轮询, <<: [*LX, *JC, *OT], include-all: true, icon: *OTT}
+
+  # 全球节点
+  - {name: 全球-故转, <<: [*FB, *JC, *AL], proxies: [全球-智选, 全球-自动, 全球-手选, 全球-均衡-散列, 全球-均衡-轮询], icon: *ALT}
+  - {name: 全球-智选, <<: [*ST, *JC, *AL], include-all: true, policy-priority: *PriorityDQ, icon: *ALT}
+  - {name: 全球-自动, <<: [*ZD, *JC, *AL], include-all: true, icon: *ALT}
+  - {name: 全球-手选, <<: [*SD, *JC, *AL], include-all: true, icon: *ALT}
+  - {name: 全球-均衡-散列, <<: [*XL, *JC, *AL], include-all: true, icon: *ALT}
+  - {name: 全球-均衡-轮询, <<: [*LX, *JC, *AL], include-all: true, icon: *ALT}
+
+# 每个服务：UDP 443(QUIC) → 代理QUIC控制组；其余 → 目标策略组
+# quic: &quic 'AND,((NETWORK,udp),(DST-PORT,443)),代理QUIC'
+
+# ███████████████████████████ 规则匹配 ███████████████████████████
+rules:
+  - AND,((RULE-SET,cn!_domain),(DST-PORT,443),(NETWORK,UDP)),REJECT
+  - RULE-SET,private_ip,直接连接,no-resolve
+  - RULE-SET,private_domain,直接连接
+  # 广告拦截
+#   - RULE-SET,category-ads,AdBlock
+
+  # ======== 自建规则 ========
+  - RULE-SET,popcorn,奈飞视频
+  - RULE-SET,zhilian,直接连接
+  - RULE-SET,zhibo,奈飞视频
+  - RULE-SET,daili,默认代理
+
+  - RULE-SET,ai_domain,人工智能
+  - RULE-SET,youtube_domain,油管视频
+  - RULE-SET,google_domain,谷歌服务
+  - RULE-SET,github_domain,GitHub
+  - RULE-SET,onedrive_domain,OneDrive
+  - RULE-SET,microsoftcn_domain,直接连接
+  - RULE-SET,microsoft_domain,微软服务
+  - RULE-SET,applecn_domain,直接连接
+  - RULE-SET,apple_domain,苹果服务
+  - RULE-SET,telegram_domain,电报消息
+  - RULE-SET,twitter_domain,Twitter
+  - RULE-SET,tiktok_domain,TikTok
+  - RULE-SET,netflix_domain,奈飞视频
+  - RULE-SET,disney_domain,DisneyPlus
+  - RULE-SET,primevideo_domain,PrimeVideo
+  - RULE-SET,hbo_domain,HBO
+  - RULE-SET,apple-tvplus_domain,AppleTV+
+  - RULE-SET,bahamut_domain,Bahamut
+  - RULE-SET,Category-Games-cn,直接连接
+  - RULE-SET,Category-Games,游戏平台
+  - RULE-SET,paypal_domain,PayPal
+  - RULE-SET,binance_domain,货币平台
+  - RULE-SET,okx_domain,货币平台
+  - RULE-SET,usd_domain,货币平台
+  - RULE-SET,steamcn_domain,直接连接
+  - RULE-SET,steam_domain,Steam
+  - RULE-SET,cn!_domain,默认代理
+  - RULE-SET,google_ip,谷歌服务
+  - RULE-SET,apple_ip,苹果服务
+  - RULE-SET,telegram_ip,电报消息
+  - RULE-SET,netflix_ip,奈飞视频
+  - RULE-SET,cn_ip,直接连接
+  - MATCH,漏网之鱼
+
+# ███████████████████████████ 规则来源 ███████████████████████████
+rule-providers:
+  fakeipfilter_cn:     {<<: *DmnTxt, url: 'https://raw.githubusercontent.com/qichiyuhub/rule/refs/heads/main/rules/fakeipfilter-cn.list'}
+  fakeipfilter_!cn:    {<<: *DmnTxt, url: 'https://raw.githubusercontent.com/qichiyuhub/rule/refs/heads/main/rules/fakeipfilter-!cn.list'}
+  private_domain:      {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/private.mrs'}
+  ai_domain:           {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/category-ai-!cn.mrs'}
+  youtube_domain:      {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/youtube.mrs'}
+  google_domain:       {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/google.mrs'}
+  github_domain:       {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/github.mrs'}
+  onedrive_domain:     {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/onedrive.mrs'}
+  microsoftcn_domain:  {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/microsoft@cn.mrs'}
+  microsoft_domain:    {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/microsoft.mrs'}
+  applecn_domain:      {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/apple@cn.mrs'}
+  apple_domain:        {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/apple.mrs'}
+  telegram_domain:     {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/telegram.mrs'}
+  twitter_domain:      {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/twitter.mrs'}
+  tiktok_domain:       {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/tiktok.mrs'}
+  netflix_domain:      {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/netflix.mrs'}
+  disney_domain:       {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/disney.mrs'}
+  primevideo_domain:   {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/primevideo.mrs'}
+  hbo_domain:          {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/hbo.mrs'}
+  apple-tvplus_domain: {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/apple-tvplus.mrs'}
+  bahamut_domain:      {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/bahamut.mrs'}
+  Category-Games-cn:   {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/category-games@cn.mrs'}
+  Category-Games:      {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/category-games.mrs'}
+  paypal_domain:       {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/paypal.mrs'}
+  binance_domain:      {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/binance.mrs'}
+  okx_domain:          {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/okx.mrs'}
+  usd_domain:          {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/category-cryptocurrency.mrs'}
+  steamcn_domain:      {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/steam@cn.mrs'}
+  steam_domain:        {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/steam.mrs'}
+  cn!_domain:          {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/geolocation-!cn.mrs'}
+  cn_domain:           {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/cn.mrs'}
+
+  google_ip:           {<<: *IpcMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geoip/google.mrs'}
+  apple_ip:            {<<: *IpcMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo-lite/geoip/apple.mrs'}
+  telegram_ip:         {<<: *IpcMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geoip/telegram.mrs'}
+  netflix_ip:          {<<: *IpcMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geoip/netflix.mrs'}
+  cn_ip:               {<<: *IpcMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geoip/cn.mrs'}
+  private_ip:          {<<: *IpcMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geoip/private.mrs'}
+
+  category-ads:        {<<: *DmnMrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/category-ads.mrs'}
+  # ======== 自建规则 ========
+  popcorn:             { <<: *ClsTxt, url: 'https://raw.githubusercontent.com/hhliulei/my-openclash/refs/heads/main/rules/popcorn.list' }
+  zhilian:             { <<: *ClsTxt, url: 'https://raw.githubusercontent.com/hhliulei/my-openclash/refs/heads/main/rules/zhilian.list' }
+  zhibo:               { <<: *ClsTxt, url: 'https://raw.githubusercontent.com/hhliulei/my-openclash/refs/heads/main/rules/zhibo.list' }
+  daili:               { <<: *ClsTxt, url: 'https://raw.githubusercontent.com/hhliulei/my-openclash/refs/heads/main/rules/daili.list' }
+
+# ==================== EOF ====================
